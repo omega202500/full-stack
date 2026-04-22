@@ -1,6 +1,5 @@
-
-
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,9 +12,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-0j+)k(usw*15b^a3eq5fj_%15w34%j=%^pw$6k7wegvq(x5=1u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True  # Passe à False plus tard en production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # ✅ MODIFIÉ : autorise tous les hôtes (Render)
 
 
 # Application definition
@@ -29,22 +28,29 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'api.apps.ApiConfig',
     'rest_framework',
+    'corsheaders',  # ✅ AJOUTÉ : nécessaire pour django-cors-headers
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # ✅ AJOUTÉ : pour les fichiers statiques
+    'corsheaders.middleware.CorsMiddleware',  # ✅ DÉPLACÉ : doit être tôt dans la liste
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     'corsheaders.middleware.CorsMiddleware',
 ]
 
-CORS_ORIGIN_ALLOW_ALL = [
+# ✅ CORRIGÉ : CORS configuration (la bonne syntaxe)
+CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
+    'https://ton-frontend.vercel.app',  # À remplacer par ton URL Vercel plus tard
 ]
+
+# Ou si tu veux tout autoriser (pour les tests seulement) :
+# CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -112,3 +118,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # ✅ AJOUTÉ : pour collectstatic
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'  # ✅ AJOUTÉ
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
