@@ -1,7 +1,20 @@
+// lib/api.ts
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL + "api/",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
+
+// Intercepteur pour gérer les erreurs globalement
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("API Error:", error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 export default api;

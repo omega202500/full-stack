@@ -27,28 +27,32 @@ export default function Home() {
 const [text, setText] = useState<string>("");
 const [amount, setAmount] = useState<number | "">("");
 const [loading, setLoading] = useState<boolean>(false);
-  const getTransactions = async () => {
-    try {
-      const rest = await api.get<Transaction[]>("transactions/");
-      setTransactions(rest.data);
-      toast.success("Transaction reussie avec succes!");
-    } catch (error) {
-      console.error("Echec de la transaction", error);
-      toast.error("Failed to fetch transactions");
-    }
-  };
+ const getTransactions = async () => {
+  try {
+    const response = await api.get<Transaction[]>("transactions/");
+    setTransactions(response.data);
+    // toast.success("Transaction reussie avec succes!"); ← SUPPRIME cette ligne
+  } catch (error) {
+    console.error("Echec de la transaction", error);
+    toast.error("Failed to fetch transactions");
+  }
+};
 
 
-    const deletTransactions = async (id: string) => {
-    try {
-      const rest = await api.delete(`transactions/${id}/`);
-      getTransactions();
-      toast.success("Transaction supprimée avec succès!");
-    } catch (error) {
-      console.error("Echec de la transaction", error);
-      toast.error("Failed to fetch transactions");
-    }
-  };
+const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+const deleteTransaction = async (id: string) => {
+  setIsDeleting(id);
+  try {
+    await api.delete(`transactions/${id}/`);
+    getTransactions();
+    toast.success("Transaction supprimée avec succès!");
+  } catch (error) {
+    toast.error("Failed to delete transaction");
+  } finally {
+    setIsDeleting(null);
+  }
+};
 
       const addTransaction = async () => {
         if (text.trim() === "" || amount === "" || isNaN(Number(amount))) {
@@ -178,7 +182,7 @@ const [loading, setLoading] = useState<boolean>(false);
                 </td>
                 <td>{formatdate(t.created_at)}</td>
                 <td>
-                  <button onClick={() => deletTransactions(t.id)}
+                  <button onClick={() => deleteTransaction(t.id)}
                   className="btn btn-sm btn-error btn-soft" title= "Supprimer">
                   <Trash className="w-4 h-4" />
                   </button>
